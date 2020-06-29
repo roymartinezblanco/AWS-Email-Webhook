@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
+
 from botocore.vendored import requests
+
+
+import json, boto3, os
 from email.parser import Parser
-import json, boto3, os, email,urllib.parse
-
-
-
+import email,urllib.parse
 s3_client = boto3.resource('s3')
 
 def print_with_timestamp(*args):
@@ -32,17 +33,7 @@ def webhook(u,h):
 def get_config(network):
     file_content = s3_client.Object('ak-activation-email', (network.lower()+'-webhooks.json')).get()['Body'].read().decode('utf-8')
     return json.loads(file_content)
-def spam(ses):
-    if (receipt['spfVerdict']['status'] == 'FAIL' or
-            receipt['dkimVerdict']['status'] == 'FAIL' or
-            receipt['spamVerdict']['status'] == 'FAIL' or
-            receipt['virusVerdict']['status'] == 'FAIL'):
-        
-        return True
-    else:
-        return False
-
-
+    
 def run(event=None, context=None):
     print_with_timestamp('Starting - spam-filter')
 
@@ -50,17 +41,11 @@ def run(event=None, context=None):
     message_id = ses_notification['mail']['messageId']
     receipt = ses_notification['receipt']
 
-    
-    
+    sender = ses_notification['mail']['commonHeaders']['returnPath']
+    print_with_timestamp('Received message from:', sender)
     print_with_timestamp('Processing message:', message_id)
 
     # Check if any spam check failed
-    if spam(receipt):
-        print_with_timestamp('Rejected message:', message_id)
-    else:   
-        print_with_timestamp('Accepting message:', message_id)
-
-        
     if (receipt['spfVerdict']['status'] == 'FAIL' or
             receipt['dkimVerdict']['status'] == 'FAIL' or
             receipt['spamVerdict']['status'] == 'FAIL' or
@@ -72,20 +57,23 @@ def run(event=None, context=None):
       
         try:
             filename = message_id
-            #filename = '6srfqio8l51slu6dn9u2otkdkd10oms4i7vmqko1'
+            if sender == 'janedoe@example.com':
+                filename = '6srfqio8l51slu6dn9u2otkdkd10oms4i7vmqko1'
             mail_obj = s3_client.Object('ak-activation-email', filename)
             msg = email.message_from_bytes(mail_obj.get()['Body'].read())
-        
+            
+            
 
             print_with_timestamp("Email Fetched")
             propertyname = None
             propertyver = None
             accountname = None
             network = None
+            submittedby = None
             
             for line in str(msg).splitlines():
 
-                if propertyname is None or accountname is None or propertyver is None or network is None:
+                if propertyname is None or accountname is None or propertyver is None or network is None or submittedby is None: 
                     if propertyname is None: 
                         if(line.find("Property Name:") == 0):
                             propertyname = line.split(":")[1].strip()
@@ -102,6 +90,10 @@ def run(event=None, context=None):
                         if(line.find("successfully activated on") > -1):
                             network = line.split("successfully activated on")[1].strip().replace("!", "")
                             print_with_timestamp("Network: ", network)
+                    if submittedby is None: 
+                        if(line.find("Submitted By:") == 0):
+                            submittedby = line.split(":")[1].strip()
+                            print_with_timestamp("Submitted By: ", submittedby)
                 else:
                     break
                 
@@ -130,14 +122,18 @@ def run(event=None, context=None):
                 print_with_timestamp("Webhook Sent: "+str(webhook(endpoint,headers)))
                 try:
                     if filename != '6srfqio8l51slu6dn9u2otkdkd10oms4i7vmqko1':
-                        response = s3_client.delete_object('ak-activation-email', filename)
-                        print_with_timestamp("Object '"+filename+"' Removed from s3")
+                        
+                        response = mail_obj.delete()
+                        print_with_timestamp("Object '"+filename+"' Removed from s3: "+str(response))
                 except Exception as e:
                     print_with_timestamp(e)
                     print_with_timestamp('An error occurred: ', message_id)
 
             else:
                 print_with_timestamp("Webhook Sent: False, endpoint not found")
+                if filename != '6srfqio8l51slu6dn9u2otkdkd10oms4i7vmqko1':
+                    response = mail_obj.delete()
+                    rint_with_timestamp("Object '"+filename+"' Removed from s3: "+str(response))
                 
         except Exception as e2:
             print_with_timestamp(e2)
