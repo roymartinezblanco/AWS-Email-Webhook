@@ -9,6 +9,8 @@ import json, boto3, os, email,urllib.parse
 
 s3_client = boto3.resource('s3')
 
+
+
 class activation:
   def __init__(self, propertyname = None, propertyver = None,accountname = None,submittedby = None,network = None,endpoint = None, headers = None):
     self.propertyname = propertyname
@@ -19,27 +21,12 @@ class activation:
     self.submittedby = submittedby
     self.endpoint = endpoint
     self.headers = headers
-    
+
+
+
 def print_with_timestamp(*args):
     print(datetime.utcnow().isoformat(), *args)
 
-
-def webhook(u,h):
-    u = urllib.parse.unquote(u)
-    print_with_timestamp('Starting Webhook:', u)
-    try:
-        http = requests.Session()
-        if(u):
-            if (h):
-                result = http.get(u, headers=h)
-                print_with_timestamp('Webhook Response: '+str(result.status_code))
-            else:
-                result = http.get(u, headers=None)
-                print_with_timestamp('Webhook Response: '+str(result.status_code))
-        return True
-    except Exception as e2: 
-        print_with_timestamp(e2)
-        raise e2
 def get_config(network):
     file_content = s3_client.Object('ak-activation-email', (network.lower()+'-webhooks.json')).get()['Body'].read().decode('utf-8')
     return json.loads(file_content)
@@ -54,69 +41,68 @@ def spam(receipt):
         return True
     else:
         return False
-def findConfiguration(akEvent,configFile):
+def findConfiguration(akamaiActivation,configFile):
 
     for el in configFile['accounts']:
-        if akEvent.endpoint is None:
-            if el['name'] == akEvent.accountname:
-                print_with_timestamp("Found Account: ",akEvent.accountname)
+        if akamaiActivation.endpoint is None:
+            if el['name'] == akamaiActivation.accountname:
+                print_with_timestamp("Found Account: ",akamaiActivation.accountname)
                 if el['webhooks']:
                     for hook in el['webhooks']:
                         
-                        if hook['name'] == akEvent.propertyname:
-                            print_with_timestamp("Found Webhook for: ",akEvent.propertyname)
-                            akEvent.endpoint = hook['endpoint']
-                            akEvent.headers = hook['headers']
+                        if hook['name'] == akamaiActivation.propertyname:
+                            print_with_timestamp("Found Webhook for: ",akamaiActivation.propertyname)
+                            akamaiActivation.endpoint = hook['endpoint']
+                            akamaiActivation.headers = hook['headers']
                             break
         else:
             break
     return
 
-def identifyActivation(msg):
-    akEvent = activation()
+def identifyActivation(akamaiActivation,msg):
+    
     print_with_timestamp("Reading Activation Email")
     for line in str(msg).splitlines():
-        if akEvent.propertyname is None or akEvent.accountname is None or akEvent.propertyver is None or akEvent.network is None or akEvent.submittedby is None: 
-            if akEvent.propertyname is None: 
+        if akamaiActivation.propertyname is None or akamaiActivation.accountname is None or akamaiActivation.propertyver is None or akamaiActivation.network is None or akamaiActivation.submittedby is None: 
+            if akamaiActivation.propertyname is None: 
                 if(line.find("Property Name:") == 0):
-                    akEvent.propertyname = line.split(":")[1].strip()
-                    print_with_timestamp("Property Name: ", akEvent.propertyname)
-            if akEvent.propertyver is None: 
+                    akamaiActivation.propertyname = line.split(":")[1].strip()
+                    print_with_timestamp("Property Name: ", akamaiActivation.propertyname)
+            if akamaiActivation.propertyver is None: 
                 if(line.find("Property Version:") == 0):
-                    akEvent.propertyver =  line.split(":")[1].strip()
-                    print_with_timestamp("Property Version: ", akEvent.propertyver)
-            if akEvent.accountname is None: 
+                    akamaiActivation.propertyver =  line.split(":")[1].strip()
+                    print_with_timestamp("Property Version: ", akamaiActivation.propertyver)
+            if akamaiActivation.accountname is None: 
                 if(line.find("Account Name:") == 0):
-                    akEvent.accountname = line.split(":")[1].strip()
-                    print_with_timestamp("Account Name: ", akEvent.accountname)
-            if akEvent.network is None: 
+                    akamaiActivation.accountname = line.split(":")[1].strip()
+                    print_with_timestamp("Account Name: ", akamaiActivation.accountname)
+            if akamaiActivation.network is None: 
                 if(line.find("successfully activated on") > -1):
-                    akEvent.network = line.split("successfully activated on")[1].strip().replace("!", "")
-                    print_with_timestamp("Network: ", akEvent.network)
-            if akEvent.submittedby is None: 
+                    akamaiActivation.network = line.split("successfully activated on")[1].strip().replace("!", "")
+                    print_with_timestamp("Network: ", akamaiActivation.network)
+            if akamaiActivation.submittedby is None: 
                 if(line.find("Submitted By:") == 0):
-                    akEvent.submittedby = line.split(":")[1].strip()
-                    if akEvent.submittedby == "NA NA":
-                        akEvent.submittedby = "Automated"
-                    print_with_timestamp("Submitted By: ", akEvent.submittedby)
+                    akamaiActivation.submittedby = line.split(":")[1].strip()
+                    if akamaiActivation.submittedby == "NA NA":
+                        akamaiActivation.submittedby = "Automated"
+                    print_with_timestamp("Submitted By: ", akamaiActivation.submittedby)
                     
         else:
             break
-    return akEvent
+    return akamaiActivation
     
-def notify(akEvent,filename):
-    if akEvent.endpoint is not None:
-        #print_with_timestamp("Webhook Sent: "+str(webhook(akEvent.endpoint,akEvent.headers)))
-        akEvent.endpoint = urllib.parse.unquote(akEvent.endpoint)
-        print_with_timestamp('Starting Webhook:', akEvent.endpoint)
+def notify(akamaiActivation):
+    if akamaiActivation.endpoint is not None:
+        akamaiActivation.endpoint = urllib.parse.unquote(akamaiActivation.endpoint)
+        print_with_timestamp('Starting Webhook:', akamaiActivation.endpoint)
         try:
             http = requests.Session()
-            if(akEvent.endpoint):
-                if (akEvent.headers):
-                    result = http.get(akEvent.endpoint, headers=akEvent.headers)
+            if(akamaiActivation.endpoint):
+                if (akamaiActivation.headers):
+                    result = http.get(akamaiActivation.endpoint, headers=akamaiActivation.headers)
                     print_with_timestamp('Webhook Response: '+str(result.status_code))
                 else:
-                    result = http.get(akEvent.endpoint, headers=None)
+                    result = http.get(akamaiActivation.endpoint, headers=None)
                     print_with_timestamp('Webhook Response: '+str(result.status_code))
             return True
         except Exception as e2: 
@@ -132,8 +118,8 @@ def notify(akEvent,filename):
 def run(event=None, context=None):
     
     
-    endpoint = None
-    headers = None
+    akamaiActivation = activation()
+
     jsonObject = None
     print_with_timestamp('Starting - spam-filter')
 
@@ -152,30 +138,30 @@ def run(event=None, context=None):
     else:   
         print_with_timestamp('Accepting message:', message_id)
         try:
-            filename = message_id
+            
+            # Testing with saved s3 Files
             if sender == 'human@example.com':
                 # Human Activation
-                filename = '6srfqio8l51slu6dn9u2otkdkd10oms4i7vmqko1'
+                message_id = '6srfqio8l51slu6dn9u2otkdkd10oms4i7vmqko1'
             if sender == 'automated@example.com':
                 # Automated Activation
-                filename = 'ds1u48ce7n8aapfkkii891hob2svcu1atv940vg1'
+                message_id = 'ds1u48ce7n8aapfkkii891hob2svcu1atv940vg1'
          
-            mail_obj = s3_client.Object('ak-activation-email', filename)
+            mail_obj = s3_client.Object('ak-activation-email', message_id)
             msg = email.message_from_bytes(mail_obj.get()['Body'].read())
 
             
-            print_with_timestamp("Fetching Email Body from s3: ",filename)
-            akEvent = identifyActivation(msg)  
+            print_with_timestamp("Fetching Email Body from s3: ",message_id)
+            akamaiActivation = identifyActivation(akamaiActivation,msg)  
             
-            if akEvent.submittedby != "Automated":
+            if akamaiActivation.submittedby != "Automated":
                 print_with_timestamp("None Pipeline Activation, Triggering Webhook event")
-                print_with_timestamp("Fetching '"+akEvent.network+"' Configuration")
-                configFile = get_config(akEvent.network)
-                findConfiguration(akEvent,configFile)
-                notify(akEvent,filename)
+                print_with_timestamp("Fetching '"+akamaiActivation.network+"' Configuration")
+                findConfiguration(akamaiActivation,get_config(akamaiActivation.network))
+                notify(akamaiActivation)
                 if sender == 'noreply@akamai.com':
-                    response = mail_obj.delete_object('ak-activation-email', filename)
-                    print_with_timestamp("Object '"+filename+"' Removed from s3:",response.status_code)
+                    response = mail_obj.delete_object('ak-activation-email', message_id)
+                    print_with_timestamp("Object '"+message_id+"' Removed from s3:",response.status_code)
            
                     return True
             else:
