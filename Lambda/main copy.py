@@ -8,10 +8,6 @@ import json, boto3, os, email,urllib.parse
 
 
 s3_client = boto3.resource('s3')
-propertyname = None
-propertyver = None
-accountname = None
-network = None
 
 def print_with_timestamp(*args):
     print(datetime.utcnow().isoformat(), *args)
@@ -46,9 +42,48 @@ def spam(ses):
     else:
         return False
 
-def identifyActivation(msg):
-    print_with_timestamp("Reading Email Activation.")
-    for line in str(msg).splitlines():
+
+def run(event=None, context=None):
+    print_with_timestamp('Starting - spam-filter')
+
+    ses_notification = event['Records'][0]['ses']
+    message_id = ses_notification['mail']['messageId']
+    receipt = ses_notification['receipt']
+
+    
+    
+    print_with_timestamp('Processing message:', message_id)
+
+    # Check if any spam check failed
+    if spam(receipt):
+        print_with_timestamp('Rejected message:', message_id)
+    else:   
+        print_with_timestamp('Accepting message:', message_id)
+
+        
+    if (receipt['spfVerdict']['status'] == 'FAIL' or
+            receipt['dkimVerdict']['status'] == 'FAIL' or
+            receipt['spamVerdict']['status'] == 'FAIL' or
+            receipt['virusVerdict']['status'] == 'FAIL'):
+        print_with_timestamp('Rejected message:', message_id)
+    
+    else:
+        print_with_timestamp('Accepting message:', message_id)
+      
+        try:
+            filename = message_id
+            #filename = '6srfqio8l51slu6dn9u2otkdkd10oms4i7vmqko1'
+            mail_obj = s3_client.Object('ak-activation-email', filename)
+            msg = email.message_from_bytes(mail_obj.get()['Body'].read())
+        
+
+            print_with_timestamp("Email Fetched")
+            propertyname = None
+            propertyver = None
+            accountname = None
+            network = None
+            
+            for line in str(msg).splitlines():
 
                 if propertyname is None or accountname is None or propertyver is None or network is None:
                     if propertyname is None: 
@@ -69,34 +104,6 @@ def identifyActivation(msg):
                             print_with_timestamp("Network: ", network)
                 else:
                     break
-    
-                
-
-def run(event=None, context=None):
-    print_with_timestamp('Starting - spam-filter')
-
-    ses_notification = event['Records'][0]['ses']
-    message_id = ses_notification['mail']['messageId']
-    receipt = ses_notification['receipt']
-    sender = ses_notification['mail']['returnPath']
-
-    
-    #noreply@akamai.com
-    print_with_timestamp('Processing message:', message_id)
-
-    # Check if any spam check failed
-    if spam(receipt):
-        print_with_timestamp('Rejected message:', message_id)
-    else:   
-        print_with_timestamp('Accepting message:', message_id)
-        try:
-            filename = message_id
-            mail_obj = s3_client.Object('ak-activation-email', filename)
-            msg = email.message_from_bytes(mail_obj.get()['Body'].read())
-
-            print_with_timestamp("Email Fetched from s3")
-            
-
                 
             print_with_timestamp("Fetching Config")
             

@@ -11,4 +11,21 @@ Example usecase: Email based notifications, like Akamai Delivery Configuration A
 
 
 ## Configuration 
+
+```json
+{
+  "accounts": [
+    {
+      "name": "Global Consulting Services",
+      "webhooks": [
+        {
+          "name": "roymartinez.dev",
+          "endpoint": "http%3A%2F%2Fexample.com%2Fgeneric-webhook-trigger%2Finvoke%3Ftoken%3D7bf349ff546c43b9b62fb2b6e72f0a58",
+          "headers": { "Content-Type": "application/json" ,"User-Agent":"Webhook"}
+        }
+      ]
+    }
+  ]
+}
+```
 ## Usage
