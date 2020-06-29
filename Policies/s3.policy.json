@@ -8,7 +8,7 @@
                 "Service": "ses.amazonaws.com"
             },
             "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::ak-activation-email/*",
+            "Resource": "arn:aws:s3:::<changeme>/*",
             "Condition": {
                 "StringEquals": {
                     "aws:Referer": "446474567375"
