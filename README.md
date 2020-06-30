@@ -1,11 +1,29 @@
 # AWS-Email-Webhook
 
-## Description
-
 This project is meant to provide a reference Architecture to implement a email based webhook that would trigger Jobs/Builds on a system like `Jenkins`.
 
+What can it do: s
+* Receive and Extract details from email
+* Identify Automated Activations
+* Send Webhook
+* Configure per Property Webhooks
 
-![Configuration/Arch.png](Documentation/Arch.png)
+
+### Why?
+The problem we face is that we can't notify customers pipeline about a change on our configurations ourside of our normal email activation notifications. The idea with this project is to provide the `how to` and if there is interest we can also provide this as a POC.
+
+Not having this capability is a challenge specially when Akamai Personal makes changes to a configuration making it `out of sync`. 
+
+With this solution will receive Akamai Activation Notification `process` them and trigger a webhook. This webhook and then be used to trigger something like a `Jenkins` Job.
+
+
+
+How
+
+## Architecture
+
+
+This solution is made using AWS Services to quickly build the functionality needed.
 
 Example usecase: Email based notifications, like Akamai Delivery Configuration Activation Email.
 
