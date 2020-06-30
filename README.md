@@ -23,7 +23,10 @@ This solution is made using AWS Services to quickly build the functionality need
 
 AWS SES allows use to accept emails and to send them for processing. Lambda is used to parse the email body (saved in AWS s3) and send any configured. 
 
-Configured? yup, so SES sends the body to s3 and then triggers a lambda funtion. This function rejects spam, reads the email looking for details like Account Name, property name, network, who activated (Human or API), etc. Once we know for what account/config the notification is for
+Configured? yup, so SES sends the body to s3 and then triggers a lambda funtion. This function rejects spam, reads the email looking for details like Account Name, property name, network, who activated (Human or API), etc. Once we know for what account/config the notification is for.
+
+![Documentation/flow.png](Documentation/flow.png)
+
 
 Example usecase: Email based notifications, like Akamai Delivery Configuration Activation Email.
 
