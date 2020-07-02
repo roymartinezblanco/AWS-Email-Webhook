@@ -171,6 +171,10 @@ We should only have one Hook per property but many property per account (all thi
 
 Once all of the above is ready you can test the funtion by using the configured tests mentioned above and the reason for this is that Akamai Activations that are `Automated` ([Terraform](https://www.terraform.io/docs/providers/akamai/index.html), etc) have a null value in the `submmited by` field. Knowing this I used a hard coded email from the test ````['human@example.com','automated@example.com']``` to simulate what would happend, since I want to trigger a webhook only if a human made a change manually that would make Terraform or our VS to be our of sync, thus, trigger a merge of what is now active vs what is store in my git.
 
+![](Documentation/lamdbalog.jpg)
+
+## Have fun!..
+
 ---    
 
 ## Contribute
