@@ -52,7 +52,7 @@ Configured Webhook? For this POC that I've created is a `JSON` file that will li
 
 ## Usage
 
-Once we have configured s3, SES, Lamda and IAM all we need to do is add the configured email to the notification list `webhook@roymartinez.dev`.
+Once we have configured s3, SES, Lamda and IAM all we need to do is add the configured email to the notification list `webhook@example.com`.
 ![Activation](Documentation/Notification.jpg)
 
 ---
@@ -113,7 +113,7 @@ For SES I created a policy to limit who can send emails to this setup. In summar
 
 ![](Documentation/s3.png) **S3**
 
-Because SES will be storing the messages we need to give it permision to do so. [Full s3 IAM Policy Example](Policies/s3.policy.json)
+SES will be storing the messages we need to give it permision to do so. [Full s3 IAM Policy Example](Policies/s3.policy.json)
 
 ```json
 "Principal": {
