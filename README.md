@@ -172,7 +172,7 @@ We should only have one Hook per property but many properties per account (all t
 
 > In the future we can also merge both
 
-Once all of the above is ready you can tests the function by using the configured tests mentioned above, the reason for two tests, is that Akamai Activations that are `Automated` ([Terraform](https://www.terraform.io/docs/providers/akamai/index.html), etc) have a null value in the `submitted by` field. Knowing this we used a hardcoded email from the test `['human@example.com','automated@example.com']` to simulate what would've happened. This is because we want to trigger a webhook only for human-made changes that would make our local version (git) to be out of sync, thus, trigger a merge of what is now active vs what is stored locally.
+Once all of the above is ready you can test the function by using the configured tests mentioned above, the reason for two tests is that Akamai Activations that are `Automated` ([Terraform](https://www.terraform.io/docs/providers/akamai/index.html), etc) have a null value in the `submitted by` field. Knowing this we used a hardcoded email from the test `['human@example.com','automated@example.com']` to simulate what would've happened. This is because we want to trigger a webhook only for human-made changes that would make our local version (git) to be out of sync, thus, trigger a merge of what is now active vs what is stored locally.
 
 ![](Documentation/lamdbalog.jpg)
 
