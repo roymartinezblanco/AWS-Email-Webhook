@@ -1,12 +1,12 @@
 # AWS-Email-Webhook
 
-TLDR; This project is meant to provide a reference Architecture to implement a email based webhook that would trigger Jobs/Builds on a system like `Jenkins`.
+TLDR; This project is meant to provide a reference architecture to implement an email-based webhook that would trigger Jobs/Builds on a system like `Jenkins`.
 
 ---
 
-A challenge we face in DevOps, is when we can't notify/trigger a pipeline about a change on a system/service (ourside of our normal email activation notifications). Not having this capability is a challenge specially when Akamai Personal makes changes to a configuration making it `out of sync`. 
+A challenge we face in DevOps is when we can't notify/trigger a pipeline about a change in a system/service (outside of our normal email activation notifications). Not having this capability is a challenge especially when Akamai Personal makes changes to a configuration making it `out of sync`. 
 
-This solution will fill that void need by providing the `how to` and if there is interest we can also provide this as a servce(POC). In this example we will be receiving an Akamai Activation Notification, `process` it and trigger a webhook. 
+This solution will fill that void need by providing the `how-to` and if there is interest we can also provide this as a service(POC). In this example, we will be receiving an Akamai Activation Notification, `process` it, and trigger a webhook. 
 
 ### What it does:
 * Receive and Extract details from email
@@ -29,7 +29,7 @@ AWS SES allows us to accept emails and to send them for processing. Lambda is th
 
 This function rejects spam, parses the email looking for details like Account Name, property name, network, who activated (Human or API), etc. Once we know for what account/config the notification is for we will look for any configured Webhook from a file also in s3.
 
-Configured Webhook? For this POC that I've created is a `JSON` file that will live in s3, this file will have have any configured webhook for a give account/Property. The function once it has made sure its not spam and it has the details of the activation, using the same details it will look for any webhook under the same accountname and propetyname. Once it finds a webhook for the current activation it will make a network request `GET` to the URL and with the `HTTP` headers configured.
+Configured Webhook? For this POC that I've created is a `JSON` file that will live in s3, this file will have any configured webhook for a give account/Property. The function once it has made sure it's not spam and it has the details of the activation, using the same details it will look for any webhook under the same accountname and propetyname. Once it finds a webhook for the current activation it will make a network request `GET` to the URL and with the `HTTP` headers configured.
 
 ## Configuration Example
 
@@ -54,7 +54,7 @@ As you can see you can add custom headers to the `headers` field if needed.
 
 ## Usage
 
-Once we have configured s3, SES, Lamda and IAM all we need to do is add the configured email to the notification list `webhook@example.com`.
+Once we have configured s3, SES, Lamda, and IAM all we need to do is add the configured email to the notification list `webhook@example.com`.
 ![Activation](Documentation/Notification.jpg)
 
 ---
@@ -64,7 +64,7 @@ Once we have configured s3, SES, Lamda and IAM all we need to do is add the conf
 
 ![](Documentation/s3.png) **S3** 
 
-We need a bucket to store our messages, no special requieremnts for it except the policy to be used below.
+We need a bucket to store our messages, no special requirements for it except the policy to be used below.
 
 Please use this guide if needed: [How to create a bucket](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/create-bucket.html)
 
@@ -73,9 +73,9 @@ Upload both configuration example files found [here](Configuration) and if you w
 
 ![](Documentation/lambda.png) **Lambda**
 
-This is where most of the work goes, but for now just create a function ([update IAM policy](Policies/s3.policy.json)) and below we have a section on the script it self.
+This is where most of the work goes, but for now, just create a function ([update IAM policy](Policies/s3.policy.json)), and below we have a section on the script itself.
 
-Part from that access needed there aren't much changes around the function (excluding the code). The only thing that was added was 2 test cases that are based on the `SES` Example:
+Apart from that access needed there aren't many changes around the function (excluding the code). The only thing that was added was 2 test cases that are based on the `SES` Example:
 * [Human](Examples/Human.Testemail.json) 
 * [Automated](Examples/Human.Testemail.json)
 
@@ -90,7 +90,7 @@ If you compare them to the "Official" `SES` example the only change the have is 
 
 ![](Documentation/ses.png) **SES**
 
-Once you have create/configured `s3` and `Lambda` we can now setup `SES`.
+Once you have created/configured `s3` and `Lambda` we can now set up `SES`.
 
 Steps:
 1. [Validate your domain](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-domains.html). ![](Documentation/validatedomain.ses.jpg)
@@ -105,7 +105,7 @@ Steps:
 
 ![](Documentation/ses.png) **SES**
 
-For SES I created a policy to limit who can send emails to this setup. In summary we need to add a contition for the sender and in our example its the noreply@akamai.com.
+For SES I created a policy to limit who can send emails to this setup. In summary, we need to add a condition for the sender and in our example its the noreply@akamai.com.
 [Full SES IAM Policy Example](Policies/ses.policy.json)
 
 ```json
@@ -120,7 +120,7 @@ For SES I created a policy to limit who can send emails to this setup. In summar
 
 ![](Documentation/s3.png) **S3**
 
-SES will be storing the messages we need to give it permision to do so. [Full s3 IAM Policy Example](Policies/s3.policy.json) 
+SES will be storing the messages we need to permit it to do so. [Full s3 IAM Policy Example](Policies/s3.policy.json) 
 
 ```json
 {
@@ -134,7 +134,7 @@ SES will be storing the messages we need to give it permision to do so. [Full s3
 
 ![](Documentation/lambda.png) **Lambda**
 
-Lastly Lamdba needs invoked by `SES`. [Full Lambda IAM Policy Example](Policies/lambda.policy.json)
+Lastly, Lamdba needs to be invoked by `SES`. [Full Lambda IAM Policy Example](Policies/lambda.policy.json)
 
 ```json
 {
@@ -147,33 +147,33 @@ Lastly Lamdba needs invoked by `SES`. [Full Lambda IAM Policy Example](Policies/
 ```
 
 ---
-# Lambda Funcion
+# Lambda Function
 
-> Any recommendation are welcomed that might improve this.
+> Any recommendations are welcomed that might improve this.
 
-`SES` will trigger our function and provide details in the incomming message.
+`SES` will trigger our function and provide details in the incoming message.
 
-Fuctionality:
+Functionality:
 * Filter out Spam
-* Read message from s3
+* Read the message from s3
 * Read Configuration from s3
 * Find and Extract data
 * Send Webhook
 * Delete message from s3
 
-Using the `SES` event, we can exact information like the `messageId` (imporatant since this is the name of the file in `S3`) and `from email`. Because we are filtering with `IAM` the emails we accept messages from we don't need additional fuctionality but we do use spam validation to drop any unwanted (just in case) emails.
+Using the `SES` event, we can exact information like the `messageId` (important since this is the name of the file in `S3`) and `from email`. Because we are filtering with `IAM` the emails we accept messages from we don't need additional functionality but we do use spam validation to drop any unwanted (just in case) emails.
 
-The function once it extacts the values from the email ([see example email](Examples/Email.txt)), it reads the [Webhook Config file](Configuration/production-webhooks.json) in s3. This "service" is meant to be a multi-tenant solution and because of it the config is structure in the following way:
+The function once it extracts the values from the email ([see example email](Examples/Email.txt)), it reads the [Webhook Config file](Configuration/production-webhooks.json) in s3. This "service" is meant to be a multi-tenant solution and because of it the config is structured in the following way:
 
 > Accountname ==> Properties (Akamai Config) ==> Webhook
 
-We should only have one Hook per property but many property per account (all this comes from the email). Because Akamai has two networks `['staging','production']` a second configuration file can also be used (in the future we can also merge both).
+We should only have one Hook per property but many properties per account (all this comes from the email). Because Akamai has two networks `['staging','production']` a second configuration file can also be used (in the future we can also merge both).
 
-Once all of the above is ready you can test the funtion by using the configured tests mentioned above and the reason for this is that Akamai Activations that are `Automated` ([Terraform](https://www.terraform.io/docs/providers/akamai/index.html), etc) have a null value in the `submmited by` field. Knowing this I used a hard coded email from the test `['human@example.com','automated@example.com']` to simulate what would happend, since I want to trigger a webhook only if a human made a change manually that would make Terraform or our VS to be our of sync, thus, trigger a merge of what is now active vs what is store in my git.
+Once all of the above is ready you can test the function by using the configured tests mentioned above and the reason for this is that Akamai Activations are `Automated` ([Terraform](https://www.terraform.io/docs/providers/akamai/index.html), etc) have a null value in the `submitted by` field. Knowing this I used a hardcoded email from the test `['human@example.com','automated@example.com']` to simulate what would happen, since I want to trigger a webhook only if a human-made a change manually that would make Terraform or our VS to be out of sync, thus, trigger a merge of what is now active vs what is store in my git.
 
 ![](Documentation/lamdbalog.jpg)
 
-## Have fun!..
+## Have fun!...
 
 ---    
 
@@ -183,7 +183,7 @@ Want to contribute? Sure why not! just let me know!
 
 ## Author
 
-I’m a photography enthusiast but in business hours I am Computer Science analyst. More about me here: [](https://roymartinez.dev)
+I’m a photography enthusiast but in business hours I am a Computer Science analyst. More about me here: [](https://roymartinez.dev)
 
 ## Licensing
 
