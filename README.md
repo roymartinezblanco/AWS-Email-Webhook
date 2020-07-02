@@ -4,7 +4,7 @@ TLDR; This project is meant to provide a reference architecture to implement an 
 
 ---
 
-A challenge we face in DevOps is when we can't notify/trigger a pipeline about a change in a system/service . Not having this capability is a challenge especially when Akamai Personal makes changes to a configuration making it `out of sync`. 
+A challenge we face in DevOps is when we can't notify/trigger a pipeline about a change in a system/service . Not having this capability is a challenge especially when someone makes changes to a configuration making it `out of sync`. 
 
 This solution will fill that void need by providing the `how-to` and if there is interest we can also provide this as a service(POC). In this example, we will be receiving an Akamai Activation Notification, process it, and trigger a webhook.
 
