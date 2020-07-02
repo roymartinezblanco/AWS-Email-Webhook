@@ -33,6 +33,8 @@ Configured Webhook? For this POC that I've created is a `JSON` file that will li
 
 ## Configuration Example
 
+As you can see you can add custom headers to the `headers` field if needed.
+
 ```json
 {
   "accounts": [
@@ -66,6 +68,8 @@ We need a bucket to store our messages, no special requieremnts for it except th
 
 Please use this guide if needed: [How to create a bucket](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/create-bucket.html)
 
+Upload both configuration example files found [here](Configuration) and if you want you can also upload the sample email for testing.
+
 
 ![](Documentation/lambda.png) **Lambda**
 
@@ -92,6 +96,9 @@ Steps:
 1. [Validate your domain](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-domains.html). ![](Documentation/validatedomain.ses.jpg)
 2. [Configure IAM Policy](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/sending-authorization-policy-examples.html#sending-authorization-policy-example-from)
 3. [Create a Rule set](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/receiving-email-receipt-rule-set.htm) ![](Documentation/SES.rules.jpg)
+ in this rule set we will need 2 actions:
+   * Store Message in `S3`
+   * Trigger `Lambda`
 
 
 ## IAM Policies
@@ -102,50 +109,77 @@ For SES I created a policy to limit who can send emails to this setup. In summar
 [Full SES IAM Policy Example](Policies/ses.policy.json)
 
 ```json
-"Condition": {
+{
+  "Condition": {
     "StringEquals": {
-        "ses:FromAddress": "noreply@akamai.com"
+      "ses:FromAddress": "noreply@akamai.com"
     }
+  }
 }
 ```
 
-
-
 ![](Documentation/s3.png) **S3**
 
-SES will be storing the messages we need to give it permision to do so. [Full s3 IAM Policy Example](Policies/s3.policy.json)
+SES will be storing the messages we need to give it permision to do so. [Full s3 IAM Policy Example](Policies/s3.policy.json) 
 
 ```json
-"Principal": {
-  "Service": "ses.amazonaws.com"
-},
-"Action": "s3:PutObject",
-"Resource": "arn:aws:s3:::<changeme>/*"
+{
+  "Principal": {
+    "Service": "ses.amazonaws.com"
+  },
+  "Action": "s3:PutObject",
+  "Resource": "arn:aws:s3:::<changeme>/*"
+}
 ```
-
 
 ![](Documentation/lambda.png) **Lambda**
 
 Lastly Lamdba needs invoked by `SES`. [Full Lambda IAM Policy Example](Policies/lambda.policy.json)
 
 ```json
-"Principal": {
-  "Service": "ses.amazonaws.com"
-},
-"Action": "lambda:InvokeFunction",
-"Resource": "arn:aws:lambda:<changeme>",
+{
+  "Principal": {
+    "Service": "ses.amazonaws.com"
+  },
+  "Action": "lambda:InvokeFunction",
+  "Resource": "arn:aws:lambda:<changeme>"
+}
 ```
+
 ---
 # Lambda Funcion
 
+> Any recommendation are welcomed that might improve this.
+
+`SES` will trigger our function and provide details in the incomming message.
+
+Fuctionality:
+* Filter out Spam
+* Read message from s3
+* Read Configuration from s3
+* Find and Extract data
+* Send Webhook
+* Delete message from s3
+
+Using the `SES` event, we can exact information like the `messageId` (imporatant since this is the name of the file in `S3`) and `from email`. Because we are filtering with `IAM` the emails we accept messages from we don't need additional fuctionality but we do use spam validation to drop any unwanted (just in case) emails.
+
+The function once it extacts the values from the email ([see example email](Examples/Email.txt)), it reads the [Webhook Config file](Configuration/production-webhooks.json) in s3. This "service" is meant to be a multi-tenant solution and because of it the config is structure in the following way:
+
+> Accountname ==> Properties (Akamai Config) ==> Webhook
+
+We should only have one Hook per property but many property per account (all this comes from the email). Because Akamai has two networks ```['staging','production']``` a second configuration file can also be used (in the future we can also merge both).
+
+Once all of the above is ready you can test the funtion by using the configured tests mentioned above and the reason for this is that Akamai Activations that are `Automated` ([Terraform](https://www.terraform.io/docs/providers/akamai/index.html), etc) have a null value in the `submmited by` field. Knowing this I used a hard coded email from the test ````['human@example.com','automated@example.com']``` to simulate what would happend, since I want to trigger a webhook only if a human made a change manually that would make Terraform or our VS to be our of sync, thus, trigger a merge of what is now active vs what is store in my git.
+
 ---    
+
 ## Contribute
 
 Want to contribute? Sure why not! just let me know!
 
 ## Author
 
-Me https://roymartinez.dev/
+I’m a photography enthusiast but in business hours I am Computer Science analyst. More about me here: [](https://roymartinez.dev)
 
 ## Licensing
 

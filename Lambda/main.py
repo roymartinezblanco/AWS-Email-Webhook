@@ -41,6 +41,7 @@ def spam(receipt):
         return True
     else:
         return False
+
 def findConfiguration(akamaiActivation,configFile):
 
     for el in configFile['accounts']:
@@ -120,7 +121,6 @@ def run(event=None, context=None):
     
     akamaiActivation = activation()
 
-    jsonObject = None
     print_with_timestamp('Starting - spam-filter')
 
     ses_notification = event['Records'][0]['ses']
@@ -167,8 +167,7 @@ def run(event=None, context=None):
             else:
                 print_with_timestamp("Pipeline Activation, No Webhook event Triggered")
                 return False
-        
-           
+    
             
         except Exception as e2:
             print_with_timestamp(e2)
