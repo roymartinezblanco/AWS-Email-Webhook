@@ -11,7 +11,7 @@
             "Resource": "arn:aws:s3:::<changeme>/*",
             "Condition": {
                 "StringEquals": {
-                    "aws:Referer": "446474567375"
+                    "aws:Referer": "<changeme>"
                 }
             }
         }

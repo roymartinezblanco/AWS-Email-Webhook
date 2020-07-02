@@ -47,8 +47,8 @@ def findConfiguration(akamaiActivation,configFile):
         if akamaiActivation.endpoint is None:
             if el['name'] == akamaiActivation.accountname:
                 print_with_timestamp("Found Account: ",akamaiActivation.accountname)
-                if el['webhooks']:
-                    for hook in el['webhooks']:
+                if el['properties']:
+                    for hook in el['properties']:
                         
                         if hook['name'] == akamaiActivation.propertyname:
                             print_with_timestamp("Found Webhook for: ",akamaiActivation.propertyname)
