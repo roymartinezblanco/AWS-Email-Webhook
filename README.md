@@ -6,7 +6,7 @@ TLDR; This project is meant to provide a reference architecture to implement an 
 
 A challenge we face in DevOps is when we can't notify/trigger a pipeline about a change in a system/service . Not having this capability is a challenge especially when someone makes changes to a configuration making it `out of sync`. 
 
-This solution will fill that void need by providing the `how-to` and if there is interest we can also provide this as a service(POC). In this example, we will be receiving an Akamai Activation Notification, process it, and trigger a webhook.
+This solution will fill that void need by providing the `how-to`. In this example, we will be receiving an Akamai Activation Notification, process it, and trigger a webhook.
 
 ### What it does:
 * Receive and Extract details from email
@@ -33,7 +33,7 @@ Configured Webhook? For this POC that I've created is a `JSON` file that will li
 
 ## Configuration Example
 
-As you can see you can add custom headers to the `headers` field, as well specifying the endpoint URL (URL Enconded).
+As you can see you can add custom headers to the `headers` field, as well specifying the endpoint URL (URL Encoded).
 
 ```json
 {
@@ -106,7 +106,7 @@ Steps:
 
 ![](Documentation/ses.png) **SES**
 
-For SES I created a policy to limit who can send emails to this setup. In summary, we need to add a condition for the sender, in our example it's noreply@akamai.com.
+For SES create a policy to limit who can send emails to this setup. In summary, we need to add a condition for the sender, in our example it's noreply@akamai.com.
 [Full SES IAM Policy Example](Policies/ses.policy.json)
 
 ```json
@@ -172,7 +172,7 @@ We should only have one Hook per property but many properties per account (all t
 
 > In the future we can also merge both
 
-Once all of the above is ready you can tests the function by using the configured tests mentioned above, the reason for two tests, is that Akamai Activations that are `Automated` ([Terraform](https://www.terraform.io/docs/providers/akamai/index.html), etc) have a null value in the `submitted by` field. Knowing this I used a hardcoded email from the test `['human@example.com','automated@example.com']` to simulate what would've happened. This is because I want to trigger a webhook only for human-made changes that would make our local version (git) to be out of sync, thus, trigger a merge of what is now active vs what is stored locally.
+Once all of the above is ready you can tests the function by using the configured tests mentioned above, the reason for two tests, is that Akamai Activations that are `Automated` ([Terraform](https://www.terraform.io/docs/providers/akamai/index.html), etc) have a null value in the `submitted by` field. Knowing this we used a hardcoded email from the test `['human@example.com','automated@example.com']` to simulate what would've happened. This is because we want to trigger a webhook only for human-made changes that would make our local version (git) to be out of sync, thus, trigger a merge of what is now active vs what is stored locally.
 
 ![](Documentation/lamdbalog.jpg)
 
