@@ -54,7 +54,7 @@ As you can see you can add custom headers to the `headers` field, as well specif
 
 ## Usage
 
-Once we have configured s3, SES, Lamda, and IAM all we need to do is add the configured email to the notification list `webhook@example.com`.
+Once we have configured s3, SES, Lambda, and IAM all we need to do is add the configured email to the notification list `webhook@example.com`.
 
 ![Activation](Documentation/Notification.jpg)
 
