@@ -13,7 +13,7 @@
             "Resource": "arn:aws:ses:<changeme>",
             "Condition": {
                 "StringEquals": {
-                    "ses:FromAddress": "noreply@akamai.com"
+                    "ses:FromAddress": "<changeme>"
                 }
             }
         }

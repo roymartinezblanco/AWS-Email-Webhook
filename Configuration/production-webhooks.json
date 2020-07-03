@@ -1,11 +1,11 @@
 {
   "accounts": [
     {
-      "name": "Advanced Solutions Services",
+      "name": "Global Consulting Services",
       "properties": [
         {
           "name": "roymartinez.dev",
-          "endpoint": "http%3A%2F%2F54.157.28.119%3A8080%2Fgeneric-webhook-trigger%2Finvoke%3Ftoken%3D7bf349ff546c43b9b62fb2b6e72f0a58",
+          "endpoint": "http%3A%2F%2Fxx.xx.xx.xx%2Fwebhook-trigger%2Finvoke%3Ftoken%3D6d16fb663eb74fa2a490e4fb6cf794c9",
           "headers": { "Content-Type": "application/json" ,"User-Agent":"Webhook"}
         },
         {
