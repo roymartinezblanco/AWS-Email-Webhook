@@ -28,7 +28,7 @@ def print_with_timestamp(*args):
     print(datetime.utcnow().isoformat(), *args)
 
 def get_config(network):
-    file_content = s3_client.Object('ak-activation-email', (network.lower()+'-webhooks.json')).get()['Body'].read().decode('utf-8')
+    file_content = s3_client.Object('ak-activation-email', ('configurations/'+network.lower()+'-webhooks.json')).get()['Body'].read().decode('utf-8')
     return json.loads(file_content)
 
 
@@ -142,10 +142,10 @@ def run(event=None, context=None):
             # Testing with saved s3 Files
             if sender == 'human@example.com':
                 # Human Activation
-                message_id = '6srfqio8l51slu6dn9u2otkdkd10oms4i7vmqko1'
+                message_id = 'examples/human'
             if sender == 'automated@example.com':
                 # Automated Activation
-                message_id = 'ds1u48ce7n8aapfkkii891hob2svcu1atv940vg1'
+                message_id = 'examples/automated'
          
             mail_obj = s3_client.Object('ak-activation-email', message_id)
             msg = email.message_from_bytes(mail_obj.get()['Body'].read())
