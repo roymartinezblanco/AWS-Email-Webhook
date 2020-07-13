@@ -146,12 +146,14 @@ def run(event=None, context=None):
             if sender == 'automated@example.com':
                 # Automated Activation
                 message_id = 'examples/automated'
-         
-            mail_obj = s3_client.Object('ak-activation-email', message_id)
+            
+            message_id = "dhhna9fh9jmc6v714pqjq62p7vf92lhcm8nbp0g1"
+            
+            mail_obj = s3_client.Object('ak-activation-email', "messages/"+message_id)
             msg = email.message_from_bytes(mail_obj.get()['Body'].read())
 
             
-            print_with_timestamp("Fetching Email Body from s3: ",message_id)
+            print_with_timestamp("Fetching Email Body from s3: ","messages/"+message_id)
             akamaiActivation = identifyActivation(akamaiActivation,msg)  
             
             if akamaiActivation.submittedby != "Automated":
@@ -159,9 +161,11 @@ def run(event=None, context=None):
                 print_with_timestamp("Fetching '"+akamaiActivation.network+"' Configuration")
                 findConfiguration(akamaiActivation,get_config(akamaiActivation.network))
                 notify(akamaiActivation)
+                mail_obj.delete()
+                print_with_timestamp("Object '"+message_id+"' Removed from s3")
                 if sender == 'noreply@akamai.com':
-                    response = mail_obj.delete_object('ak-activation-email', message_id)
-                    print_with_timestamp("Object '"+message_id+"' Removed from s3:",response.status_code)
+                    mail_obj.delete()
+                    print_with_timestamp("Object '"+message_id+"' Removed from s3")
            
                     return True
             else:
