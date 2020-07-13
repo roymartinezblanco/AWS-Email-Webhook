@@ -160,8 +160,7 @@ def run(event=None, context=None):
                 print_with_timestamp("None Pipeline Activation, Triggering Webhook event")
                 print_with_timestamp("Fetching '"+akamaiActivation.network+"' Configuration")
                 findConfiguration(akamaiActivation,get_config(akamaiActivation.network))
-                notify(akamaiActivation)
-                mail_obj.delete()
+      
                 print_with_timestamp("Object '"+message_id+"' Removed from s3")
                 if sender == 'noreply@akamai.com':
                     mail_obj.delete()
