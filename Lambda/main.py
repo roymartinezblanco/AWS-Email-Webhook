@@ -142,26 +142,32 @@ def run(event=None, context=None):
             # Testing with saved s3 Files
             if sender == 'human@example.com':
                 # Human Activation
-                message_id = 'examples/human'
-            if sender == 'automated@example.com':
+                message_id = 'human'
+                directory = 'examples/'
+            elif sender == 'automated@example.com':
                 # Automated Activation
-                message_id = 'examples/automated'
+                message_id = 'automated'
+                directory = 'examples/'
+            else:
+                directory = 'messages/'
+        
+                
             
-            message_id = "dhhna9fh9jmc6v714pqjq62p7vf92lhcm8nbp0g1"
+
             
-            mail_obj = s3_client.Object('ak-activation-email', "messages/"+message_id)
+            mail_obj = s3_client.Object('ak-activation-email', directory+message_id)
             msg = email.message_from_bytes(mail_obj.get()['Body'].read())
 
             
-            print_with_timestamp("Fetching Email Body from s3: ","messages/"+message_id)
+            print_with_timestamp("Fetching Email Body from s3: ",directory+message_id)
             akamaiActivation = identifyActivation(akamaiActivation,msg)  
             
             if akamaiActivation.submittedby != "Automated":
                 print_with_timestamp("None Pipeline Activation, Triggering Webhook event")
                 print_with_timestamp("Fetching '"+akamaiActivation.network+"' Configuration")
                 findConfiguration(akamaiActivation,get_config(akamaiActivation.network))
-      
-                print_with_timestamp("Object '"+message_id+"' Removed from s3")
+                notify(akamaiActivation)
+         
                 if sender == 'noreply@akamai.com':
                     mail_obj.delete()
                     print_with_timestamp("Object '"+message_id+"' Removed from s3")
